@@ -185,9 +185,7 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
                         Math.pow(x, 2) + 
                         Math.pow(y, 2)
                     );
-        
-        console.log(from, to, x, y, n, Math.pow(x, 2), Math.pow(y, 2));
-
+            
         return L.point(
             from.x + x/n * -25, 
             from.y + y/n * -25
