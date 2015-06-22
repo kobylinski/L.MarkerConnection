@@ -1,0 +1,23 @@
+{
+    "name": "L.MarkerConnection",
+    "version": "0.0.1",
+    "homepage": "https://github.com/kobylinski/L.MarkerConnection",
+    "authors": [
+        "kobylinski <marek@niepsuj.it>"
+    ],
+    "main": "dist/l.marker-connection.min.js",
+    "keywords": [
+        "Leaflet"
+    ],
+    "licence": "MIT",
+    "ignore": [
+        "node_modules",
+        "bower_components",
+        "**/.*"
+    ],
+    "dependencies": {
+        "leaflet": "^0.7.3",
+        "leaflet.geometryutil": "makinacorpus/Leaflet.GeometryUtil",
+        "lodash": "^3.9.3"
+    }
+}
