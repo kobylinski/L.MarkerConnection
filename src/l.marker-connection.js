@@ -156,12 +156,12 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
             _pPos, _nPos;
 
         if(direction){
-            _nPos = map.unproject(direction);
+            _nPos = this._map.unproject(direction);
         }else{
-            var _pPos = map.project(_mPos);
+            var _pPos = this._.project(_mPos);
             _pPos.x += 20;
             _pPos.y -= 20;
-            _nPos = map.unproject(_pPos);
+            _nPos = this._.unproject(_pPos);
         }              
 
         this.cursor.setLatLng(_nPos);
@@ -177,8 +177,8 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
 
     computeDirection: function(point){
         
-        var from    = map.project(this.selected.getLatLng()),
-            to      = map.project(point),
+        var from    = this._map.project(this.selected.getLatLng()),
+            to      = this._map.project(point),
             x       = from.x - to.x,
             y       = from.y - to.y,
             n       = Math.sqrt(
