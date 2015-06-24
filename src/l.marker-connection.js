@@ -158,10 +158,10 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
         if(direction){
             _nPos = this._map.unproject(direction);
         }else{
-            var _pPos = this._.project(_mPos);
+            var _pPos = this._map.project(_mPos);
             _pPos.x += 20;
             _pPos.y -= 20;
-            _nPos = this._.unproject(_pPos);
+            _nPos = this._map.unproject(_pPos);
         }              
 
         this.cursor.setLatLng(_nPos);
