@@ -66,6 +66,13 @@ L.MarkerConnection.Connection = L.Polyline.extend({
         }
 
         return false;
+    },
+
+    getMarkers: function() {
+        return {
+            start: this.startMarker,
+            end: this.endMarker
+        }
     }
 });
 
@@ -74,17 +81,20 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
         L.LayerGroup.prototype.initialize.call(this, layers);
         this.connections = L.featureGroup();
         this.selected = null;
+        this.enabled = true;
         
         this.cursor = L.marker(null, {icon: new L.MarkerConnection.Circle(), zIndexOffset: -10});
         this.line = L.polyline([], {color: 'red', opacity: 1});
 
         this.on('click', function(e){
-            this.selectMarker(e.layer);
+            if(this.enabled){
+                this.selectMarker(e.layer);
+            }
         });
 
         var _this = this;
 
-        this.cursor.on('mousedown', function(){
+        this.cursor.on('mousedown', function(e) {
             _this._map.on('mousemove', function(e){
                 if(null === _this.selected) return false;
                 var closest = L.GeometryUtil.closestLayerSnap(_this._map, _this.getLayers(), e.latlng, 20),
@@ -104,10 +114,7 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
                 if(null !== closest && !_this.hasConnection(_this.selected, closest.layer)){
                     _this._map.removeLayer(_this.line);
                     _this._map.removeLayer(_this.cursor);
-
-                    var connection = new L.MarkerConnection.Connection([_this.selected, closest.layer], {color: 'red', opacity: 1, strokeWidth: 1});
-                    _this.connections.addLayer(connection);
-
+                    _this.addConnection(_this.selected, closest.layer);
                     _this.selected = null;
                 }else{
                     _this.selectMarker(_this.selected, _this.computeDirection(e.latlng));
@@ -116,8 +123,37 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
         });
 
         this.connections.on('click', function(e){
-            this.removeLayer(e.layer);
+            if(_this.enabled){
+                this.removeLayer(e.layer);
+            }
         });
+    },
+
+    addConnection: function(start, end){
+        var connection = new L.MarkerConnection.Connection([start, end], {color: 'red', opacity: 1, strokeWidth: 1});
+        this.connections.addLayer(connection);
+    },
+
+    getConnections: function(){
+        var connections = [];
+        this.connections.eachLayer(function(connection){
+            connections.push(connection.getMarkers());
+        });
+
+        return connections;
+    },
+
+    enable:function()
+    {
+        this.enabled = true;
+    },
+
+    disable:function()
+    {
+        this._map.removeLayer(this.line);
+        this._map.removeLayer(this.cursor);
+        this.selected = null;
+        this.enabled = false;
     },
 
     onAdd: function(map){
@@ -137,6 +173,24 @@ L.MarkerConnection.Elements = L.FeatureGroup.extend({
                 this.connections.removeLayer(connection);
             }
         }, this);
+        marker.off('drag', this.markerDrag)
+    },
+
+    addLayer: function(marker){
+        L.FeatureGroup.prototype.addLayer.call(this, marker);
+        marker.on('drag', this.markerDrag, this);
+    },
+
+    markerDrag: function(e){
+        this.connections.eachLayer(function(connection){
+            if(connection.hasMarker(e.target)){
+                connection.updateConnection();
+            }
+        }, this);
+
+        if(this.selected == e.target){
+            this.selectMarker(this.selected);
+        }
     },
 
     hasConnection: function(marker1, marker2){
